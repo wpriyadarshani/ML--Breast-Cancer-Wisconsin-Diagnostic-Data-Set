@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import KFold
+from sklearn import svm
 
 
 def loadData():
@@ -12,7 +13,7 @@ def loadData():
     np.random.shuffle(total_data)
 
     total_y = total_data[:,1]
-    total_X = total_data[:,2:]
+    total_X = total_data[:,2:-1]
 
 
     #malignant 1 else 0
@@ -22,6 +23,36 @@ def loadData():
         else:
             total_y[i] = 0
 
-    print(total_y)
+    # print(total_X)
 
     return total_X, total_y
+
+total_X, total_y = loadData()
+
+#SVM 
+
+#cross validate data
+def SVM_implementation():
+    accuracy = []
+    kf = KFold(n_splits=10)
+    for training_id, test_id in kf.split(total_X):
+        train_x, test_x = total_X[training_id], total_X[test_id]
+        train_y, test_y = total_y[training_id], total_y[test_id]
+
+        train_y = train_y.astype('int') 
+        clf = svm.SVC(gamma='scale')
+        clf.fit(train_x, train_y)
+
+        output = clf.predict(test_x)
+
+        # print(output)
+
+        correct = sum(np.array(output == test_y))
+
+        accuracy.append((correct* 1.0)/ len(output))
+
+
+    print("average accuracy SVM", sum(accuracy)/ 10.0)
+
+SVM_implementation()
+   
